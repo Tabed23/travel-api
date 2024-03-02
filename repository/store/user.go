@@ -30,22 +30,29 @@ func (u *UserStore) CreaterUser(usr models.User) (models.User, error) {
 	return usr, nil
 }
 
-func (u *UserStore) GetAll() ([]models.User, error) {
+func (u *UserStore) GetAll(page, limit int) ([]models.User, int, error) {
 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancle()
 	users := []models.User{}
-	cur, err := u.coll.Find(ctx, bson.M{})
+	skip := (page - 1) * limit
+
+	opts := options.Find().SetLimit(int64(limit)).SetSkip(int64(skip))
+	cur, err := u.coll.Find(ctx, bson.M{}, opts)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	for cur.Next(ctx) {
 		var user models.User
 		if err := cur.Decode(&user); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		users = append(users, user)
 	}
-	return users, nil
+	count, err := u.coll.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return nil, 0, err
+	}
+	return users, int(count), nil
 }
 
 func (u UserStore) Get(Email string) (models.User, error) {

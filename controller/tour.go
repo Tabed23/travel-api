@@ -81,10 +81,11 @@ func (t *TourController) Delete(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	if !ok {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	if ok {
+		return c.Status(http.StatusOK).JSON(fiber.Map{"success": ok})
+
 	}
-	return c.Status(http.StatusOK).JSON(fiber.Map{"success": ok})
+	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err})
 }
 
 func (t *TourController) GetTour(c *fiber.Ctx) error {
