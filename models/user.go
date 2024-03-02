@@ -7,10 +7,11 @@ import (
 )
 
 type User struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	Username string             `bson:"username,required,unique"`
-	Email    string             `bson:"email,required,unique"`
-	Password string             `bson:"password,required"`
+	ID        primitive.ObjectID `bson:"_id,omitempty"`
+	FirstName string             `bson:"first_name,required"`
+	Lastname  string             `bson:"last_name,required"`
+	Email     string             `bson:"email,required,unique"`
+	Password  string             `bson:"password,required"`
 
 	Photo     string    `bson:"photo,omitempty"`
 	Role      string    `bson:"role,default:user"`
