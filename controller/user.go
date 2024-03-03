@@ -30,7 +30,7 @@ func (u *UserController) CreateUser(c *fiber.Ctx) error {
 
 	}
 
-	return c.Status(http.StatusCreated).JSON(fiber.Map{"success": "tour created successfully", "data": res})
+	return c.Status(http.StatusCreated).JSON(fiber.Map{"success": "user created successfully", "data": res})
 }
 
 func (u *UserController) UpdateUser(c *fiber.Ctx) error {
@@ -46,7 +46,7 @@ func (u *UserController) UpdateUser(c *fiber.Ctx) error {
 
 	}
 
-	return c.Status(http.StatusCreated).JSON(fiber.Map{"success": "tour created successfully", "data": res})
+	return c.Status(http.StatusCreated).JSON(fiber.Map{"success": "user updated successfully", "data": res})
 }
 
 func (u *UserController) Get(c *fiber.Ctx) error {

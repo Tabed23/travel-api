@@ -56,6 +56,28 @@ func main() {
 	app.Get("/tours/search/count", func(c *fiber.Ctx) error {
 		return tourController.CountTotalTours(c)
 	})
+
+
+	userColl := db.Collection("userColl")
+	userStore := store.NewUserStore(*userColl)
+	userController := controller.NewUserController(*userStore)
+
+	app.Post("/user", func(c *fiber.Ctx) error {
+		return userController.CreateUser(c)
+	})
+	app.Get("/user", func(c *fiber.Ctx) error {
+		return userController.Get(c)
+	})
+	app.Get("/user/:email", func(c *fiber.Ctx) error {
+		return userController.GetUser(c)
+	})
+	app.Delete("/user/:email", func(c *fiber.Ctx) error {
+		return userController.Delete(c)
+	})
+	app.Put("/user/:email", func(c *fiber.Ctx) error {
+		return userController.UpdateUser(c)
+	})
+
 	app.Listen(":3000")
 
 }

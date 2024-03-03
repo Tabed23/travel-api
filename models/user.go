@@ -18,3 +18,8 @@ type User struct {
 	CreatedAt time.Time `bson:"createdAt,omitempty"`
 	UpdatedAt time.Time `bson:"updatedAt,omitempty"`
 }
+
+type UserLogin struct {
+	Email    string `bson:"email,required,unique"`
+	Password string `bson:"password,required"`
+}

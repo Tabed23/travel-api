@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/tabed23/travel-api/models"
+	"github.com/tabed23/travel-api/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,9 +22,15 @@ func NewUserStore(c mongo.Collection) *UserStore {
 func (u *UserStore) CreaterUser(usr models.User) (models.User, error) {
 	usr.ID = primitive.NewObjectID()
 	usr.CreatedAt = time.Now().UTC()
+	usr.UpdatedAt = time.Now().UTC()
+	hash, err  := utils.EnscryptPassword(usr.Password)
+	if err != nil {
+		return models.User{}, err
+	}
+	usr.Password = hash
 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancle()
-	_, err := u.coll.InsertOne(ctx, &usr)
+	_, err = u.coll.InsertOne(ctx, &usr)
 	if err != nil {
 		return models.User{}, err
 	}
