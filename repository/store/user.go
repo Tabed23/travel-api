@@ -23,7 +23,7 @@ func (u *UserStore) CreaterUser(usr models.User) (models.User, error) {
 	usr.ID = primitive.NewObjectID()
 	usr.CreatedAt = time.Now().UTC()
 	usr.UpdatedAt = time.Now().UTC()
-	hash, err  := utils.EnscryptPassword(usr.Password)
+	hash, err := utils.EnscryptPassword(usr.Password)
 	if err != nil {
 		return models.User{}, err
 	}

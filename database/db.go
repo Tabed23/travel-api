@@ -13,7 +13,7 @@ type MongoDB struct {
 	db *mongo.Client
 }
 
-func NewDatabase(monguri string ) (*MongoDB, error) {
+func NewDatabase(monguri string) (*MongoDB, error) {
 
 	db, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(monguri))
 	if err != nil {
