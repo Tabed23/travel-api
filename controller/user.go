@@ -23,6 +23,12 @@ func (u *UserController) CreateUser(c *fiber.Ctx) error {
 
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+	validateErr := validate.Struct(usr)
+
+	if validateErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validateErr.Error()})
+
+	}
 
 	res, err := u.s.CreaterUser(usr)
 	if err != nil {
@@ -34,12 +40,19 @@ func (u *UserController) CreateUser(c *fiber.Ctx) error {
 }
 
 func (u *UserController) UpdateUser(c *fiber.Ctx) error {
-	var usr models.User
+	var usr models.UserUpdate
 	id := c.Params("email")
 	if err := c.BodyParser(&usr); err != nil {
 
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+	validateErr := validate.Struct(usr)
+
+	if validateErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validateErr.Error()})
+
+	}
+
 	res, err := u.s.UpdateUser(id, usr)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

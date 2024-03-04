@@ -81,14 +81,20 @@ func (u UserStore) Delete(Email string) (bool, error) {
 	}
 	return true, nil
 }
-func (u UserStore) UpdateUser(email string, usr models.User) (models.User, error) {
+func (u UserStore) UpdateUser(email string, usr models.UserUpdate) (models.User, error) {
 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
+	var hashPass string
+	if usr.Password != "" {
+		hashPass, _ = utils.EnscryptPassword(usr.Password)
+	}
+
 	defer cancle()
 	update := bson.M{
 		"first_name": usr.FirstName,
 		"last_name":  usr.Lastname,
-		"Password":   usr.Password,
+		"Password":   hashPass,
 		"role":       usr.Role,
+		"photo":      usr.Photo,
 		"updatedAt":  time.Now().UTC(),
 	}
 	_, err := u.coll.UpdateOne(ctx, bson.M{"email": email}, bson.M{"$set": update})
@@ -115,4 +121,14 @@ func (u *UserStore) GetUserByValue(ctx context.Context, value, data string) (mod
 	usr := models.User{}
 	u.coll.FindOne(ctx, bson.M{value: data}).Decode(&u)
 	return usr, nil
+}
+
+func (u *UserStore) GetUserByEmail(email string) (models.User, error) {
+	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancle()
+	var user models.User
+	if err := u.coll.FindOne(ctx, bson.M{"email": email}).Decode(&user); err != nil {
+		return models.User{}, err
+	}
+	return user, nil
 }

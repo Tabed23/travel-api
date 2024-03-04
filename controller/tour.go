@@ -23,6 +23,12 @@ func (t *TourController) CreateTour(c *fiber.Ctx) error {
 
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+	validateErr := validate.Struct(tour)
+
+	if validateErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validateErr.Error()})
+
+	}
 
 	res, err := t.s.CreateTour(tour)
 	if err != nil {
@@ -39,6 +45,13 @@ func (t *TourController) UpdateTour(c *fiber.Ctx) error {
 	if err := c.BodyParser(&tour); err != nil {
 
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	validateErr := validate.Struct(tour)
+
+	if validateErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validateErr.Error()})
+
 	}
 	res, err := t.s.Update(id, tour)
 	if err != nil {

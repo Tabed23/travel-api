@@ -9,6 +9,8 @@ import (
 	"github.com/tabed23/travel-api/controller"
 	"github.com/tabed23/travel-api/database"
 	"github.com/tabed23/travel-api/repository/store"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func main() {
@@ -24,7 +26,8 @@ func main() {
 	}
 	db := dbClient.GetDB()
 	app := fiber.New()
-
+	app.Use(cors.New())
+	app.Use(logger.New())
 	tourColl := db.Collection("tourColl")
 	tourStore := store.NewTourStore(*tourColl)
 	tourController := controller.NewTourController(*tourStore)
