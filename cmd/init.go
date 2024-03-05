@@ -23,4 +23,5 @@ func Init(app *fiber.App) {
 	r.UserRoutes(app)
 	r.AuthRoutes(app)
 	r.ReviewRoutes(app)
+	r.BookingRoutes(app)
 }
