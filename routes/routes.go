@@ -112,22 +112,22 @@ func (r *Routes) BookingRoutes(app *fiber.App) {
 	bookingController := controller.NewBookingController(*bookingStore)
 	routes := app.Group("/api/v1/booking")
 
-	routes.Post("/booking", func(c *fiber.Ctx) error {
+	routes.Post("/booking", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return bookingController.CreatBooking(c)
 	})
 
-	routes.Get("/booking/:id", func(c *fiber.Ctx) error {
+	routes.Get("/booking/:id", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return bookingController.GetBooking(c)
 	})
 
-	routes.Delete("/booking/:id", func(c *fiber.Ctx) error {
+	routes.Delete("/booking/:id", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return bookingController.Delete(c)
 	})
-	routes.Put("/booking/:id", func(c *fiber.Ctx) error {
+	routes.Put("/booking/:id", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return bookingController.UpdateBooking(c)
 	})
 
-	routes.Get("/booking", func(c *fiber.Ctx) error {
+	routes.Get("/booking", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return bookingController.Get(c)
 	})
 
