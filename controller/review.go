@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -26,8 +25,9 @@ func (r *ReviewController) CreateReview(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
-
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	tourId := c.Params("id")
 	var review models.Review
 	if err := c.BodyParser(&review); err != nil {
@@ -57,7 +57,9 @@ func (r *ReviewController) Get(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	page := c.Query("page", "1")
 	limit := c.Query("limit", "10")
 
@@ -88,8 +90,9 @@ func (r *ReviewController) Delete(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
-
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	id := c.Params("id")
 
 	ok, err := r.s.Delete(id)
@@ -109,7 +112,9 @@ func (r *ReviewController) GetReview(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	id := c.Params("id")
 	res, err := r.s.GetOne(id)
 	if err != nil {

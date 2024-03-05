@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,8 +24,9 @@ func (u *UserController) CreateUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
-
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	var usr models.User
 	if err := c.BodyParser(&usr); err != nil {
 
@@ -54,8 +54,9 @@ func (u *UserController) UpdateUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
-
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	var usr models.UserUpdate
 	id := c.Params("email")
 	if err := c.BodyParser(&usr); err != nil {
@@ -84,7 +85,9 @@ func (u *UserController) Get(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	page := c.Query("page", "1")
 	limit := c.Query("limit", "10")
 
@@ -116,7 +119,9 @@ func (t *UserController) Delete(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	email := c.Params("email")
 
 	ok, err := t.s.Delete(email)
@@ -136,7 +141,9 @@ func (u *UserController) GetUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	email := c.Params("email")
 	res, err := u.s.Get(email)
 	if err != nil {

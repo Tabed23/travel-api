@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,7 +24,9 @@ func (u *BookingController) CreatBooking(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	var booking models.Booking
 	if err := c.BodyParser(&booking); err != nil {
 
@@ -53,8 +54,9 @@ func (u *BookingController) UpdateBooking(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
-
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	var updatebooking models.UpdateBooking
 	id := c.Params("id")
 	if err := c.BodyParser(&updatebooking); err != nil {
@@ -83,7 +85,9 @@ func (u *BookingController) Get(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	page := c.Query("page", "1")
 	limit := c.Query("limit", "10")
 
@@ -115,7 +119,9 @@ func (t *BookingController) Delete(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	id := c.Params("id")
 
 	ok, err := t.s.DeleteBook(id)
@@ -135,7 +141,9 @@ func (u *BookingController) GetBooking(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(claims)
+	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	}
 	id := c.Params("id")
 	res, err := u.s.GetBooking(id)
 	if err != nil {
