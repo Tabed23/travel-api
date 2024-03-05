@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -90,5 +91,25 @@ func main() {
 		return authController.Login(c)
 	})
 	fmt.Println(os.Getenv("PORT"))
-	app.Listen(":" + os.Getenv("PORT"))
+
+	idleConnsClosed := make(chan struct{})
+
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+
+		if err := app.Shutdown(); err != nil {
+			log.Printf("Oops... Server is not shutting down! Reason: %v", err)
+		}
+
+		close(idleConnsClosed)
+	}()
+
+	if err := app.Listen(":" + os.Getenv("PORT")); err != nil {
+		log.Printf("Oops... Server is not running! Reason: %v", err)
+	}
+
+	<-idleConnsClosed
+
 }
