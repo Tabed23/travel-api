@@ -1,12 +1,14 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/tabed23/travel-api/models"
 	"github.com/tabed23/travel-api/repository/store"
+	"github.com/tabed23/travel-api/utils"
 )
 
 type UserController struct {
@@ -63,6 +65,12 @@ func (u *UserController) UpdateUser(c *fiber.Ctx) error {
 }
 
 func (u *UserController) Get(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
 	page := c.Query("page", "1")
 	limit := c.Query("limit", "10")
 
@@ -84,7 +92,8 @@ func (u *UserController) Get(c *fiber.Ctx) error {
 		"tours": tours,
 		"page":  pageInt,
 		"limit": limitInt,
-		"total": total})
+		"total": total,
+	})
 }
 
 func (t *UserController) Delete(c *fiber.Ctx) error {

@@ -3,8 +3,10 @@ package utils
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -48,23 +50,30 @@ func GenrateNewToken(role, email string) (string, error) {
 
 }
 
-func validateSignedMethod(token *jwt.Token) (interface{}, error) {
-	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-	}
-	return jwtSecret, nil
-}
+func ParseToken(tokenString string) (*Claims, error) {
 
-func ParseToken(tokenString string) (*jwt.StandardClaims, error) {
-	claims := new(jwt.StandardClaims)
-	token, err := jwt.ParseWithClaims(tokenString, claims, validateSignedMethod)
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+
 	if err != nil {
 		return nil, err
 	}
 	var ok bool
-	claims, ok = token.Claims.(*jwt.StandardClaims)
+	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
 		return nil, fmt.Errorf("invalid Token: %v", tokenString)
 	}
 	return claims, nil
+}
+
+func ExtractToken(c *fiber.Ctx) string {
+	bearToken := c.Get("Authorization")
+
+	onlyToken := strings.Split(bearToken, " ")
+	if len(onlyToken) == 2 {
+		return onlyToken[1]
+	}
+
+	return ""
 }

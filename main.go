@@ -1,16 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	"github.com/tabed23/travel-api/controller"
 	"github.com/tabed23/travel-api/database"
+	"github.com/tabed23/travel-api/middleware"
 	"github.com/tabed23/travel-api/repository/store"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func main() {
@@ -36,7 +38,7 @@ func main() {
 
 		return tourController.CreateTour(c)
 	})
-	app.Get("/tour", func(c *fiber.Ctx) error {
+	app.Get("/tour", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return tourController.Get(c)
 	})
 
@@ -60,7 +62,6 @@ func main() {
 		return tourController.CountTotalTours(c)
 	})
 
-
 	userColl := db.Collection("userColl")
 	userStore := store.NewUserStore(*userColl)
 	userController := controller.NewUserController(*userStore)
@@ -81,6 +82,13 @@ func main() {
 		return userController.UpdateUser(c)
 	})
 
-	app.Listen(":3000")
-
+	authController := controller.NewAuthController(*userStore)
+	app.Post("/regiser", func(c *fiber.Ctx) error {
+		return authController.Register(c)
+	})
+	app.Post("/login", func(c *fiber.Ctx) error {
+		return authController.Login(c)
+	})
+	fmt.Println(os.Getenv("PORT"))
+	app.Listen(":" + os.Getenv("PORT"))
 }
