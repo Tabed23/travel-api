@@ -14,7 +14,6 @@ func AuthMiddleware(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).SendString("Invalid Token")
 	}
 
-	// Extract user information from the token and store it in the context
 	c.Set("role", token.Role)
 
 	return c.Next()
