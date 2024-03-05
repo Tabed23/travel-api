@@ -11,16 +11,43 @@ import (
 	"github.com/tabed23/travel-api/utils"
 )
 
-type ReviewController struct {
-	s store.ReviewStore
+type BookingController struct {
+	s store.BookingStore
 }
 
-func NewReviewController(s store.ReviewStore) *ReviewController {
-	return &ReviewController{s: s}
+func NewBookingController(s store.BookingStore) *BookingController {
+	return &BookingController{s: s}
 }
 
-func (r *ReviewController) CreateReview(c *fiber.Ctx) error {
+func (u *BookingController) CreatBooking(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
+	var booking models.Booking
+	if err := c.BodyParser(&booking); err != nil {
 
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	validateErr := validate.Struct(booking)
+
+	if validateErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validateErr.Error()})
+
+	}
+
+	res, err := u.s.CreateBooking(booking)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+
+	}
+
+	return c.Status(http.StatusCreated).JSON(fiber.Map{"success": "Booking created successfully", "data": res})
+}
+
+func (u *BookingController) UpdateBooking(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
@@ -28,30 +55,29 @@ func (r *ReviewController) CreateReview(c *fiber.Ctx) error {
 	}
 	fmt.Println(claims)
 
-	tourId := c.Params("id")
-	var review models.Review
-	if err := c.BodyParser(&review); err != nil {
+	var updatebooking models.UpdateBooking
+	id := c.Params("id")
+	if err := c.BodyParser(&updatebooking); err != nil {
 
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	validateErr := validate.Struct(review)
+	validateErr := validate.Struct(updatebooking)
 
 	if validateErr != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validateErr.Error()})
 
 	}
 
-	res, err := r.s.CreateReviw(tourId, review)
+	res, err := u.s.Update(id, updatebooking)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 
 	}
 
-	return c.Status(http.StatusCreated).JSON(fiber.Map{"success": "review created successfully", "data": res})
+	return c.Status(http.StatusCreated).JSON(fiber.Map{"success": "booking updated successfully", "data": res})
 }
 
-func (r *ReviewController) Get(c *fiber.Ctx) error {
-
+func (u *BookingController) Get(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
@@ -70,29 +96,29 @@ func (r *ReviewController) Get(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid limit"})
 	}
 
-	reviews, total, err := r.s.GetAll(pageInt, limitInt)
+	bookings, total, err := u.s.GetAll(pageInt, limitInt)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{"success": "true",
-		"reviews": reviews,
-		"page":    pageInt,
-		"limit":   limitInt,
-		"total":   total})
+		"bookings": bookings,
+		"page":     pageInt,
+		"limit":    limitInt,
+		"total":    total,
+	})
 }
 
-func (r *ReviewController) Delete(c *fiber.Ctx) error {
+func (t *BookingController) Delete(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
 	fmt.Println(claims)
-
 	id := c.Params("id")
 
-	ok, err := r.s.Delete(id)
+	ok, err := t.s.DeleteBook(id)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -103,7 +129,7 @@ func (r *ReviewController) Delete(c *fiber.Ctx) error {
 	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err})
 }
 
-func (r *ReviewController) GetReview(c *fiber.Ctx) error {
+func (u *BookingController) GetBooking(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
@@ -111,10 +137,10 @@ func (r *ReviewController) GetReview(c *fiber.Ctx) error {
 	}
 	fmt.Println(claims)
 	id := c.Params("id")
-	res, err := r.s.GetOne(id)
+	res, err := u.s.GetBooking(id)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{"tour": res})
+	return c.Status(http.StatusOK).JSON(fiber.Map{"booking": res})
 }

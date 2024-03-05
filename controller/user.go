@@ -20,6 +20,13 @@ func NewUserController(s store.UserStore) *UserController {
 }
 
 func (u *UserController) CreateUser(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
+
 	var usr models.User
 	if err := c.BodyParser(&usr); err != nil {
 
@@ -42,6 +49,13 @@ func (u *UserController) CreateUser(c *fiber.Ctx) error {
 }
 
 func (u *UserController) UpdateUser(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
+
 	var usr models.UserUpdate
 	id := c.Params("email")
 	if err := c.BodyParser(&usr); err != nil {
@@ -83,13 +97,13 @@ func (u *UserController) Get(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid limit"})
 	}
 
-	tours, total, err := u.s.GetAll(pageInt, limitInt)
+	users, total, err := u.s.GetAll(pageInt, limitInt)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{"success": "true",
-		"tours": tours,
+		"users": users,
 		"page":  pageInt,
 		"limit": limitInt,
 		"total": total,
@@ -97,6 +111,12 @@ func (u *UserController) Get(c *fiber.Ctx) error {
 }
 
 func (t *UserController) Delete(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
 	email := c.Params("email")
 
 	ok, err := t.s.Delete(email)
@@ -111,6 +131,12 @@ func (t *UserController) Delete(c *fiber.Ctx) error {
 }
 
 func (u *UserController) GetUser(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
 	email := c.Params("email")
 	res, err := u.s.Get(email)
 	if err != nil {

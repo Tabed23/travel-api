@@ -22,4 +22,5 @@ func Init(app *fiber.App) {
 	r.TourRoutes(app)
 	r.UserRoutes(app)
 	r.AuthRoutes(app)
+	r.ReviewRoutes(app)
 }

@@ -17,7 +17,7 @@ type Tour struct {
 	Price        float64            `bson:"price,required"`
 	MaxGroupSize int                `bson:"maxGroupSize,required"`
 
-	Reviews   []primitive.ObjectID `bson:"reviews,ref:Review"`
+	Reviews   []primitive.ObjectID `bson:"reviews,ref:Reviews"`
 	Featured  bool                 `bson:"featured,default:false"`
 	CreatedAt time.Time            `bson:"createdAt,omitempty"`
 	UpdatedAt time.Time            `bson:"updatedAt,omitempty"`

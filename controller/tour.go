@@ -20,6 +20,12 @@ func NewTourController(s store.TourStore) *TourController {
 }
 
 func (t *TourController) CreateTour(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
 	var tour models.Tour
 	if err := c.BodyParser(&tour); err != nil {
 
@@ -42,6 +48,13 @@ func (t *TourController) CreateTour(c *fiber.Ctx) error {
 }
 
 func (t *TourController) UpdateTour(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
+
 	var tour models.Tour
 	id := c.Params("id")
 	if err := c.BodyParser(&tour); err != nil {
@@ -97,6 +110,13 @@ func (t *TourController) Get(c *fiber.Ctx) error {
 }
 
 func (t *TourController) Delete(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
+
 	id := c.Params("id")
 
 	ok, err := t.s.DeleteTour(id)
@@ -111,6 +131,13 @@ func (t *TourController) Delete(c *fiber.Ctx) error {
 }
 
 func (t *TourController) GetTour(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
+
 	id := c.Params("id")
 	res, err := t.s.Get(id)
 	if err != nil {
@@ -121,12 +148,18 @@ func (t *TourController) GetTour(c *fiber.Ctx) error {
 }
 
 func (t *TourController) SearchTour(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
+
 	city := c.Query("city")
 	dist := c.Query("distance")
 	group := c.Query("maxGroupSize")
 
 	var distance, maxGroupSize int
-	var err error
 	if dist != "" {
 		distance, err = strconv.Atoi(dist)
 		if err != nil {
@@ -148,6 +181,12 @@ func (t *TourController) SearchTour(c *fiber.Ctx) error {
 }
 
 func (t *TourController) ShowFeaturedTour(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
 	feature, err := t.s.FeaturedTour()
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -156,6 +195,12 @@ func (t *TourController) ShowFeaturedTour(c *fiber.Ctx) error {
 }
 
 func (t *TourController) CountTotalTours(c *fiber.Ctx) error {
+	bearerToken := utils.ExtractToken(c)
+	claims, err := utils.ParseToken(bearerToken)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println(claims)
 	totalTours, err := t.s.CountTours()
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
