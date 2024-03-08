@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"io"
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -17,8 +19,18 @@ func Init(app *fiber.App) {
 		return
 	}
 	db := dbClient.GetDB()
-
-	r := routes.NewRoutes(db)
+	file, err := os.OpenFile("service.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer file.Close()
+	logHandler := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+	multiWriter := io.MultiWriter(file, os.Stderr)
+	logger := slog.New(slog.NewTextHandler(multiWriter, logHandler))
+	slog.SetDefault(logger)
+	r := routes.NewRoutes(db, logger)
 	r.TourRoutes(app)
 	r.UserRoutes(app)
 	r.AuthRoutes(app)

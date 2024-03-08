@@ -2,9 +2,12 @@ package store
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/tabed23/travel-api/models"
+	"github.com/tabed23/travel-api/utils/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,13 +15,16 @@ import (
 )
 
 type TourStore struct {
-	coll mongo.Collection
+	coll   mongo.Collection
+	logger *slog.Logger
 }
 
-func NewTourStore(c mongo.Collection) *TourStore {
-	return &TourStore{coll: c}
+func NewTourStore(c mongo.Collection, l *slog.Logger) *TourStore {
+	return &TourStore{coll: c, logger: l}
 }
 func (t *TourStore) CreateTour(tour models.Tour) (models.Tour, error) {
+	t.logger.Info("repository", "CreateTour", "Tour")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	tour.ID = primitive.NewObjectID()
@@ -32,9 +38,10 @@ func (t *TourStore) CreateTour(tour models.Tour) (models.Tour, error) {
 
 	return tour, nil
 }
+func (t *TourStore) IsExist(ctx context.Context, filter primitive.M) (bool, error) {
+	t.logger.Info("repository", "IsExist", "Tour")
 
-func (t *TourStore) IsExist(ctx context.Context, value, data string) (bool, error) {
-	count, err := t.coll.CountDocuments(ctx, bson.M{value: data})
+	count, err := t.coll.CountDocuments(ctx, filter)
 	if err != nil {
 		return false, err
 	}
@@ -48,10 +55,20 @@ func (t *TourStore) IsExist(ctx context.Context, value, data string) (bool, erro
 }
 
 func (t *TourStore) DeleteTour(_id string) (bool, error) {
+	t.logger.Info("repository", "DeleteTour", "Tour")
+
 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancle()
 	objId, _ := primitive.ObjectIDFromHex(_id)
-	_, err := t.coll.DeleteOne(ctx, bson.M{"_id": objId})
+	filter := bson.M{"_id": objId}
+	ok, err := t.IsExist(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+	if !ok {
+		return false, errors.ErrUserNotFound
+	}
+	_, err = t.coll.DeleteOne(ctx, bson.M{"_id": objId})
 	if err != nil {
 		return false, err
 	}
@@ -59,10 +76,20 @@ func (t *TourStore) DeleteTour(_id string) (bool, error) {
 }
 
 func (t *TourStore) Get(id string) (models.Tour, error) {
+	t.logger.Info("repository", "Get", "Tour")
+
 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancle()
 	var tour models.Tour
 	objId, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.M{"_id": objId}
+	ok, err := t.IsExist(ctx, filter)
+	if err != nil {
+		return models.Tour{}, err
+	}
+	if !ok {
+		return models.Tour{}, errors.ErrUserNotFound
+	}
 	if err := t.coll.FindOne(ctx, bson.M{"_id": objId}).Decode(&tour); err != nil {
 		return models.Tour{}, err
 	}
@@ -71,8 +98,10 @@ func (t *TourStore) Get(id string) (models.Tour, error) {
 }
 
 func (t *TourStore) GetAll(page, limit int) ([]models.Tour, int, error) {
+	t.logger.Info("repository", "GetAll", "Tour")
+
 	tours := []models.Tour{}
-	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancle := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancle()
 	skip := (page - 1) * limit
 
@@ -97,14 +126,19 @@ func (t *TourStore) GetAll(page, limit int) ([]models.Tour, int, error) {
 }
 
 func (t *TourStore) Update(_id string, updated models.Tour) (models.Tour, error) {
+	t.logger.Info("repository", "Update", "Tour")
+
 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancle()
-	ok, err := t.IsExist(ctx, _id, "_id")
+	objId, _ := primitive.ObjectIDFromHex(_id)
+	filter := bson.M{"_id": objId}
+	ok, err := t.IsExist(ctx, filter)
 	if err != nil {
 		return models.Tour{}, err
 	}
-	if ok {
-		objId, _ := primitive.ObjectIDFromHex(_id)
+	if !ok {
+		return models.Tour{}, errors.ErrUserNotFound
+	} else {
 		updated := bson.M{
 			"title":        updated.Title,
 			"city":         updated.City,
@@ -122,10 +156,11 @@ func (t *TourStore) Update(_id string, updated models.Tour) (models.Tour, error)
 		}
 		return t.Get(_id)
 	}
-	return models.Tour{}, nil
 }
 
 func (t *TourStore) SearchTour(city string, distance float32, maxgroupsize int) ([]models.Tour, error) {
+	t.logger.Info("repository", "SearchTour", "Tour")
+
 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancle()
 
@@ -150,12 +185,23 @@ func (t *TourStore) SearchTour(city string, distance float32, maxgroupsize int) 
 }
 
 func (t *TourStore) FeaturedTour() ([]models.Tour, error) {
+	t.logger.Info("repository", "FeaturedTour", "Tour")
 
 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancle()
 	filter := bson.M{"featured": true}
+	ok, err := t.IsExist(ctx, filter)
+	if err != nil {
+		t.logger.Error("repository", "FeaturedTour", err.Error())
+		return []models.Tour{}, err
+	}
+	if !ok {
+		t.logger.Error("repository", "FeaturedTour", fmt.Sprintf("%v is not Found", filter))
+		return []models.Tour{}, errors.ErrUserNotFound
+	}
 	cur, err := t.coll.Find(ctx, filter)
 	if err != nil {
+		t.logger.Error("repository", "FeaturedTour", err.Error())
 		return []models.Tour{}, err
 	}
 	tours := []models.Tour{}
@@ -163,12 +209,15 @@ func (t *TourStore) FeaturedTour() ([]models.Tour, error) {
 	for cur.Next(ctx) {
 		tour := models.Tour{}
 		if err := cur.Decode(&tour); err != nil {
+			t.logger.Error("repository", "FeaturedTour", fmt.Sprintf("Could not Decode the %v, err : %v", tour, err.Error()))
+
 			continue
 		}
 		tours = append(tours, tour)
 	}
 
 	if cur.Err() != nil {
+		t.logger.Error("repository", "FeaturedTour", cur.Err())
 		return []models.Tour{}, err
 	}
 	return tours, nil
@@ -176,9 +225,13 @@ func (t *TourStore) FeaturedTour() ([]models.Tour, error) {
 }
 
 func (t *TourStore) CountTours() (int, error) {
+	t.logger.Info("repository", "CountTours", "Tour")
+
 	opts := options.Count().SetHint("_id_")
 	count, err := t.coll.CountDocuments(context.TODO(), bson.D{}, opts)
 	if err != nil {
+		t.logger.Error("repository", "CountTours", err.Error())
+
 		return 0, err
 	}
 	return int(count), nil

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -10,28 +11,30 @@ import (
 	"github.com/tabed23/travel-api/models"
 	"github.com/tabed23/travel-api/repository/store"
 	"github.com/tabed23/travel-api/utils"
+	"github.com/tabed23/travel-api/utils/errors"
 )
 
 var validate = validator.New()
 
 type AuthController struct {
 	s store.UserStore
+	logger *slog.Logger
 }
 
-func NewAuthController(s store.UserStore) *AuthController {
-	return &AuthController{s: s}
+func NewAuthController(s store.UserStore, l *slog.Logger) *AuthController {
+	return &AuthController{s: s, logger: l}
 }
 
 func (a *AuthController) Register(c *fiber.Ctx) error {
 	var usr models.User
 	if err := c.BodyParser(&usr); err != nil {
 
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrBadRequest})
 	}
 	validateErr := validate.Struct(usr)
 
 	if validateErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validateErr.Error()})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validateErr.Error(), "message": errors.ErrBadRequest})
 
 	}
 

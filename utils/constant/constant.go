@@ -1,4 +1,5 @@
-package models
+package constant
+
 
 const (
 	AdminRole string = "admin"

@@ -1,18 +1,1 @@
-05-Mar-2024 | 201 |   52.677732ms | 127.0.0.1 | POST | - | 1780229 201 - POST /api/v1/user/user
-05-Mar-2024 | 404 |      54.703µs | 127.0.0.1 | POST | Cannot POST /api/v1/review:65e44214efeeff5f6d894409 | 2479200 404 - POST /api/v1/review:65e44214efeeff5f6d894409
-05-Mar-2024 | 404 |      25.398µs | 127.0.0.1 | POST | Cannot POST /api/v1/review:65e44214efeeff5f6d894409/review | 2479200 404 - POST /api/v1/review:65e44214efeeff5f6d894409/review
-05-Mar-2024 | 500 |  56.24157265s | 127.0.0.1 | POST | - | 2483950 500 - POST /api/v1/review/65e44214efeeff5f6d894409/review
-05-Mar-2024 | 201 | 31.071237142s | 127.0.0.1 | POST | - | 2655078 201 - POST /api/v1/review/65e44214efeeff5f6d894409/review
-05-Mar-2024 | 404 |      48.254µs | 127.0.0.1 | GET | Cannot GET /tour | 2655078 404 - GET /tour
-05-Mar-2024 | 401 |  3.217963266s | 127.0.0.1 | GET | - | 2655078 401 - GET /api/v1/tour/tour
-05-Mar-2024 | 200 |  1.745167512s | 127.0.0.1 | POST | - | 2655078 200 - POST /api/v1/auth/login
-05-Mar-2024 | 200 |  7.846111911s | 127.0.0.1 | GET | - | 2655078 200 - GET /api/v1/tour/tour
-05-Mar-2024 | 500 |  7.176942253s | 127.0.0.1 | GET | - | 2702616 500 - GET /api/v1/tour/tour
-05-Mar-2024 | 200 | 19.061027166s | 127.0.0.1 | GET | - | 2711255 200 - GET /api/v1/tour/tour
-05-Mar-2024 | 500 |  13.26309054s | 127.0.0.1 | GET | - | 2727411 500 - GET /api/v1/tour/tour
-05-Mar-2024 | 500 | 22.084247517s | 127.0.0.1 | GET | - | 2739870 500 - GET /api/v1/tour/tour
-05-Mar-2024 | 200 |  4.008768515s | 127.0.0.1 | GET | - | 2742014 200 - GET /api/v1/tour/tour
-05-Mar-2024 | 200 | 22.915017649s | 127.0.0.1 | GET | - | 2744336 200 - GET /api/v1/tour/tour
-05-Mar-2024 | 401 |     178.544µs | 127.0.0.1 | GET | - | 2748990 401 - GET /api/v1/tour/tour
-05-Mar-2024 | 200 |  3.396951377s | 127.0.0.1 | POST | - | 2748990 200 - POST /api/v1/auth/login
-05-Mar-2024 | 200 |  4.721942841s | 127.0.0.1 | GET | - | 2748990 200 - GET /api/v1/tour/tour
+09-Mar-2024 | 201 |   59.804985ms | 127.0.0.1 | POST | - | 2339659 201 - POST /api/v1/auth/regiser

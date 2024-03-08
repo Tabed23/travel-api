@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"context"
+	"log/slog"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/tabed23/travel-api/controller"
 	"github.com/tabed23/travel-api/middleware"
@@ -9,16 +12,18 @@ import (
 )
 
 type Routes struct {
-	db *mongo.Database
+	db     *mongo.Database
+	logger *slog.Logger
 }
 
-func NewRoutes(db *mongo.Database) *Routes {
-	return &Routes{db: db}
+func NewRoutes(db *mongo.Database, l *slog.Logger) *Routes {
+	return &Routes{db: db, logger: l}
 }
 func (r *Routes) TourRoutes(app *fiber.App) {
+	r.logger.Log(context.Background(), slog.LevelInfo, "Tour routes initialized")
 	tourColl := r.db.Collection("Tour")
-	tourStore := store.NewTourStore(*tourColl)
-	tourController := controller.NewTourController(*tourStore)
+	tourStore := store.NewTourStore(*tourColl, r.logger)
+	tourController := controller.NewTourController(*tourStore, r.logger)
 	routes := app.Group("/api/v1/tour")
 	routes.Post("/tour", func(c *fiber.Ctx) error {
 
@@ -50,9 +55,11 @@ func (r *Routes) TourRoutes(app *fiber.App) {
 
 }
 func (r *Routes) UserRoutes(app *fiber.App) {
+	r.logger.Log(context.Background(), slog.LevelInfo, "User routes initialized")
+
 	userColl := r.db.Collection("User")
-	userStore := store.NewUserStore(*userColl)
-	userController := controller.NewUserController(*userStore)
+	userStore := store.NewUserStore(*userColl, r.logger)
+	userController := controller.NewUserController(*userStore, r.logger)
 	routes := app.Group("/api/v1/user")
 	routes.Post("/user", func(c *fiber.Ctx) error {
 		return userController.CreateUser(c)
@@ -72,9 +79,11 @@ func (r *Routes) UserRoutes(app *fiber.App) {
 }
 
 func (r *Routes) AuthRoutes(app *fiber.App) {
+	r.logger.Log(context.Background(), slog.LevelInfo, "Auth routes initialized")
+
 	userColl := r.db.Collection("User")
-	userStore := store.NewUserStore(*userColl)
-	authController := controller.NewAuthController(*userStore)
+	userStore := store.NewUserStore(*userColl, r.logger)
+	authController := controller.NewAuthController(*userStore, r.logger)
 	routes := app.Group("/api/v1/auth")
 	routes.Post("/regiser", func(c *fiber.Ctx) error {
 		return authController.Register(c)
@@ -85,10 +94,12 @@ func (r *Routes) AuthRoutes(app *fiber.App) {
 }
 
 func (r *Routes) ReviewRoutes(app *fiber.App) {
+	r.logger.Log(context.Background(), slog.LevelInfo, "Review routes initialized")
+
 	tourColl := r.db.Collection("Tour")
 	reviewColl := r.db.Collection("Reviews")
-	reviewStore := store.NewReviewStore(*reviewColl, *tourColl)
-	reviewController := controller.NewReviewController(*reviewStore)
+	reviewStore := store.NewReviewStore(*reviewColl, *tourColl, r.logger)
+	reviewController := controller.NewReviewController(*reviewStore, r.logger)
 	routes := app.Group("/api/v1/review")
 	routes.Post("/:id/review", func(c *fiber.Ctx) error {
 
@@ -101,15 +112,17 @@ func (r *Routes) ReviewRoutes(app *fiber.App) {
 	routes.Get("/review/:id", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return reviewController.GetReview(c)
 	})
-	routes.Delete("/review/:id", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
+	routes.Delete("/:tourid/review/:reviewid", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return reviewController.Delete(c)
 	})
 }
 
 func (r *Routes) BookingRoutes(app *fiber.App) {
+	r.logger.Log(context.Background(), slog.LevelInfo, "booking routes initialized")
+
 	bookingColl := r.db.Collection("Booking")
-	bookingStore := store.NewBookStore(*bookingColl)
-	bookingController := controller.NewBookingController(*bookingStore)
+	bookingStore := store.NewBookStore(*bookingColl, r.logger)
+	bookingController := controller.NewBookingController(*bookingStore, r.logger)
 	routes := app.Group("/api/v1/booking")
 
 	routes.Post("/booking", middleware.AuthMiddleware, func(c *fiber.Ctx) error {

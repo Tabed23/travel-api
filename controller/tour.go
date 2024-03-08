@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -8,14 +9,16 @@ import (
 	"github.com/tabed23/travel-api/models"
 	"github.com/tabed23/travel-api/repository/store"
 	"github.com/tabed23/travel-api/utils"
+	"github.com/tabed23/travel-api/utils/constant"
 )
 
 type TourController struct {
 	s store.TourStore
+	logger *slog.Logger
 }
 
-func NewTourController(s store.TourStore) *TourController {
-	return &TourController{s: s}
+func NewTourController(s store.TourStore, l *slog.Logger) *TourController {
+	return &TourController{s: s, logger: l}
 }
 
 func (t *TourController) CreateTour(c *fiber.Ctx) error {
@@ -24,7 +27,7 @@ func (t *TourController) CreateTour(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	var tour models.Tour
@@ -54,7 +57,7 @@ func (t *TourController) UpdateTour(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 
@@ -87,7 +90,7 @@ func (t *TourController) Get(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	page := c.Query("page", "1")
@@ -120,7 +123,7 @@ func (t *TourController) Delete(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	id := c.Params("id")
@@ -142,7 +145,7 @@ func (t *TourController) GetTour(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	id := c.Params("id")
@@ -160,7 +163,7 @@ func (t *TourController) SearchTour(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	city := c.Query("city")
@@ -194,7 +197,7 @@ func (t *TourController) ShowFeaturedTour(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	feature, err := t.s.FeaturedTour()
@@ -210,7 +213,7 @@ func (t *TourController) CountTotalTours(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	totalTours, err := t.s.CountTours()

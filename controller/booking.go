@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -8,29 +9,32 @@ import (
 	"github.com/tabed23/travel-api/models"
 	"github.com/tabed23/travel-api/repository/store"
 	"github.com/tabed23/travel-api/utils"
+	"github.com/tabed23/travel-api/utils/constant"
+	"github.com/tabed23/travel-api/utils/errors"
 )
 
 type BookingController struct {
 	s store.BookingStore
+	logger *slog.Logger
 }
 
-func NewBookingController(s store.BookingStore) *BookingController {
-	return &BookingController{s: s}
+func NewBookingController(s store.BookingStore, l *slog.Logger) *BookingController {
+	return &BookingController{s: s, logger: l}
 }
 
 func (u *BookingController) CreatBooking(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrUnAuthorized})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": errors.ErrInValidRole})
 	}
 	var booking models.Booking
 	if err := c.BodyParser(&booking); err != nil {
 
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrBadRequest})
 	}
 	validateErr := validate.Struct(booking)
 
@@ -52,16 +56,16 @@ func (u *BookingController) UpdateBooking(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrUnAuthorized})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": errors.ErrInValidRole})
 	}
 	var updatebooking models.UpdateBooking
 	id := c.Params("id")
 	if err := c.BodyParser(&updatebooking); err != nil {
 
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrBadRequest})
 	}
 	validateErr := validate.Struct(updatebooking)
 
@@ -72,7 +76,7 @@ func (u *BookingController) UpdateBooking(c *fiber.Ctx) error {
 
 	res, err := u.s.Update(id, updatebooking)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrInternalServerError})
 
 	}
 
@@ -83,10 +87,10 @@ func (u *BookingController) Get(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrUnAuthorized})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": errors.ErrInValidRole})
 	}
 	page := c.Query("page", "1")
 	limit := c.Query("limit", "10")
@@ -102,7 +106,7 @@ func (u *BookingController) Get(c *fiber.Ctx) error {
 
 	bookings, total, err := u.s.GetAll(pageInt, limitInt)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrInternalServerError})
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{"success": "true",
@@ -117,32 +121,32 @@ func (t *BookingController) Delete(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrUnAuthorized})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": errors.ErrInValidRole})
 	}
 	id := c.Params("id")
 
 	ok, err := t.s.DeleteBook(id)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrInternalServerError})
 	}
 	if ok {
 		return c.Status(http.StatusOK).JSON(fiber.Map{"success": ok})
 
 	}
-	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err})
+	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err, "message": errors.ErrInternalServerError})
 }
 
 func (u *BookingController) GetBooking(c *fiber.Ctx) error {
 	bearerToken := utils.ExtractToken(c)
 	claims, err := utils.ParseToken(bearerToken)
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error(), "message": errors.ErrUnAuthorized})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": errors.ErrInValidRole})
 	}
 	id := c.Params("id")
 	res, err := u.s.GetBooking(id)

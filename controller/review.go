@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -8,14 +9,17 @@ import (
 	"github.com/tabed23/travel-api/models"
 	"github.com/tabed23/travel-api/repository/store"
 	"github.com/tabed23/travel-api/utils"
+	"github.com/tabed23/travel-api/utils/constant"
+	"github.com/tabed23/travel-api/utils/errors"
 )
 
 type ReviewController struct {
 	s store.ReviewStore
+	logger *slog.Logger
 }
 
-func NewReviewController(s store.ReviewStore) *ReviewController {
-	return &ReviewController{s: s}
+func NewReviewController(s store.ReviewStore, l *slog.Logger) *ReviewController {
+	return &ReviewController{s: s, logger: l}
 }
 
 func (r *ReviewController) CreateReview(c *fiber.Ctx) error {
@@ -25,7 +29,7 @@ func (r *ReviewController) CreateReview(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	tourId := c.Params("id")
@@ -57,7 +61,7 @@ func (r *ReviewController) Get(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
 	page := c.Query("page", "1")
@@ -90,12 +94,12 @@ func (r *ReviewController) Delete(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
 	}
-	id := c.Params("id")
-
-	ok, err := r.s.Delete(id)
+	reviewid := c.Params("tourid")
+	tourid := c.Params("reviewid")
+	ok, err := r.s.Delete(reviewid, tourid)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -112,8 +116,8 @@ func (r *ReviewController) GetReview(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	if claims.Role != models.UserRole && claims.Role != models.AdminRole {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": "invalid role"})
+	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": errors.ErrInValidRole})
 	}
 	id := c.Params("id")
 	res, err := r.s.GetOne(id)
