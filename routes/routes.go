@@ -125,7 +125,7 @@ func (r *Routes) BookingRoutes(app *fiber.App) {
 	bookingController := controller.NewBookingController(*bookingStore, r.logger)
 	routes := app.Group("/api/v1/booking")
 
-	routes.Post("/booking", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
+	routes.Post("/:id/booking", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
 		return bookingController.CreatBooking(c)
 	})
 

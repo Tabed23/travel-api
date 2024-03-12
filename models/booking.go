@@ -8,18 +8,18 @@ import (
 
 type Booking struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	UserEmail string             `bson:"user_email"`
+	UserID    primitive.ObjectID `bson:"user_id"`
+	UserEmail string             `bson:"email"`
 	TourName  string             `bson:"tour_name"`
 	GuestSize int64              `bson:"guest_size"`
 	Phone     int64              `bson:"phone"`
-	CreatedAt time.Time            `bson:"createdAt,omitempty"`
-	UpdatedAt time.Time            `bson:"updatedAt,omitempty"`
+	CreatedAt time.Time          `bson:"createdAt,omitempty"`
+	UpdatedAt time.Time          `bson:"updatedAt,omitempty"`
 }
 
-
 type UpdateBooking struct {
-	TourName  string             `bson:"tour_name"`
-	GuestSize int64              `bson:"guest_size"`
-	Phone     int64              `bson:"phone"`
-	UpdatedAt time.Time            `bson:"updatedAt,omitempty"`
+	TourName  string    `bson:"tour_name"`
+	GuestSize int64     `bson:"guest_size"`
+	Phone     int64     `bson:"phone"`
+	UpdatedAt time.Time `bson:"updatedAt,omitempty"`
 }

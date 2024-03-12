@@ -31,6 +31,7 @@ func (u *BookingController) CreatBooking(c *fiber.Ctx) error {
 	if claims.Role != constant.UserRole && claims.Role != constant.AdminRole {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"status": fiber.StatusUnauthorized, "message": errors.ErrInValidRole})
 	}
+	usrId := c.Params("id")
 	var booking models.Booking
 	if err := c.BodyParser(&booking); err != nil {
 
@@ -43,7 +44,7 @@ func (u *BookingController) CreatBooking(c *fiber.Ctx) error {
 
 	}
 
-	res, err := u.s.CreateBooking(booking)
+	res, err := u.s.CreateBooking(usrId, booking)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 

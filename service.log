@@ -1,5 +1,0 @@
-time=2024-03-09T00:53:24.314+05:00 level=INFO msg="Tour routes initialized"
-time=2024-03-09T00:53:24.314+05:00 level=INFO msg="User routes initialized"
-time=2024-03-09T00:53:24.314+05:00 level=INFO msg="Auth routes initialized"
-time=2024-03-09T00:53:24.314+05:00 level=INFO msg="Review routes initialized"
-time=2024-03-09T00:53:24.314+05:00 level=INFO msg="booking routes initialized"

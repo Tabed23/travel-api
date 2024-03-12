@@ -24,12 +24,9 @@ func Init(app *fiber.App) {
 		log.Fatalf("error opening file: %v", err)
 	}
 	defer file.Close()
-	logHandler := &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}
+	logHandler := &slog.HandlerOptions{}
 	multiWriter := io.MultiWriter(file, os.Stderr)
 	logger := slog.New(slog.NewTextHandler(multiWriter, logHandler))
-	slog.SetDefault(logger)
 	r := routes.NewRoutes(db, logger)
 	r.TourRoutes(app)
 	r.UserRoutes(app)
